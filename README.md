@@ -1,5 +1,5 @@
 # Context-Aware Chat MVP
-![branching image](branching.png)
+![branching image](branch.png)
 
 
 A **Flutter + GetX** application that implements a branching conversation model for any LLM API (Gemini, OpenAI, Claude). It maintains a tree-like conversation structure with **context-aware responses**, allowing you to branch, navigate, and maintain multiple conversational paths.
