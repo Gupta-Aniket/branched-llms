@@ -1,4 +1,4 @@
-# Context-Aware Chat MVP
+# Branched LLM mvp
 ![branching image](branch.png)
 
 
@@ -12,7 +12,6 @@ A **Flutter + GetX** application that implements a branching conversation model 
 * ✅ **Hive for Persistent Storage**
 * ✅ **Graph Visualization** of chat nodes
 * ✅ **Drawer Navigation** to switch between nodes
-* ✅ **Local Summaries for nodes** (short labels)
 * ✅ **Full Context Passing** per node for API calls
 
 ## 📱 UI Structure
