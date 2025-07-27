@@ -63,3 +63,7 @@ lib/
 
 PRs welcome! This MVP is a foundation for a **Git-style AI chat experience**.
 
+### Disclaimer  
+* I have only tested with Gemini api.
+* No api key is ever sent to me for any reasons it stays between you and the api endpoint
+
