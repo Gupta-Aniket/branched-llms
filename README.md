@@ -1,69 +1,191 @@
 # Branched LLM mvp
 ![branching image](branch.png)
 
+# Branched LLM – Context-Efficient Conversational System
 
-A **Flutter + GetX** application that implements a branching conversation model for any LLM API (Gemini, OpenAI, Claude). It maintains a tree-like conversation structure with **context-aware responses**, allowing you to branch, navigate, and maintain multiple conversational paths.
+A Flutter-based system that replaces linear chat history with a **tree-based branching model**, enabling efficient context reconstruction and multi-threaded LLM conversations.
 
-## 🚀 Features
+---
 
-* ✅ **Branching Conversation Tree** (Git-style)
-* ✅ **Multi-LLM Support** (Gemini / OpenAI / Claude)
-* ✅ **Dynamic Context Generation** (builds context from selected node up to root)
-* ✅ **Hive for Persistent Storage**
-* ✅ **Graph Visualization** of chat nodes
-* ✅ **Drawer Navigation** to switch between nodes
-* ✅ **Full Context Passing** per node for API calls
+## Problem
 
-## 📱 UI Structure
+Most LLM applications use a **linear message array**, sending the entire conversation with every request.
 
-* **Single Screen Chat Interface**
-* **Drawer with GraphView** to visualize conversation flow
-* **Long-Press to Branch** any message into a new conversation path
-* **Persistent Nodes** stored locally using Hive
+This leads to:
 
-## 🔑 Setup
+* Increasing token cost as history grows
+* Reduced response relevance due to unrelated context
+* No clean way to explore alternate conversation paths
 
-1. Clone repo
-2. Add dependencies (`get`, `hive`, `shared_preferences`, `graphview`)
-3. Provide your API key in-app
-4. Choose provider (Gemini / OpenAI / Claude)
+---
 
-## 🛠️ Architecture
+## Solution
 
-* **ChatController**: Handles node creation, context generation, and API calls
-* **ApiService**: Abstracted service for all providers with dynamic context injection
-* **ChatNode Model**: Hive-stored conversation node with `id`, `content`, `parentId`, `children`, `isUser`, `timestamp`
+This project models conversations as a **tree structure instead of a list**.
 
-## 🔮 Future Enhancements
+Each message is a node:
 
-* 🔜 **Context Compression:** Automatic summarization of older nodes to save tokens
-* 🔜 **Merge Branches:** Ability to merge context from different branches into one
-* 🔜 **UI Improvements:** Better graph layout and animated transitions
-* 🔜 **Cloud Sync:** Store nodes on backend for cross-device usage
-* 🔜 **Role-based Context:** Add system prompts and assistant metadata for richer conversations
+* Supports branching from any point
+* Isolates independent conversational paths
+* Reconstructs only the relevant context for each request
 
-## 📌 Key Design Decisions
+---
 
-* Context is built dynamically from **current node -> root**.
-* Full content is sent (no summaries) for accuracy.
-* Branching does not merge to avoid context conflicts (planned as enhancement).
+## Core Idea
 
-## 📂 Project Structure
+Instead of sending full history:
+
+**Context = path from current node → root**
+
+This ensures:
+
+* Minimal token usage
+* Better contextual relevance
+* No cross-branch interference
+
+---
+
+## Example
 
 ```
-lib/
- ├── controllers/chat_controller.dart
- ├── models/chat_node.dart
- ├── services/api_service.dart
- ├── ui/chat_screen.dart
- ├── ui/conversation_drawer.dart
+Linear Chat:
+A → B → C → D → E   (entire history sent every time)
+
+Branched:
+A → B → C
+        ↘ D → E
+
+Context for E = A → B → C → D → E
 ```
 
-## 🤝 Contributing
+---
 
-PRs welcome! This MVP is a foundation for a **Git-style AI chat experience**.
+## Architecture
 
-### Disclaimer  
-* I have only tested with Gemini api.
-* No api key is ever sent to me for any reasons it stays between you and the api endpoint
+### Data Model
 
+```dart
+ChatNode {
+  id
+  parentId
+  children[]
+  content
+  isUser
+  timestamp
+}
+```
+
+* Stored locally using Hive
+
+---
+
+### Context Generation
+
+* Traverse from selected node → root
+* Reconstruct ordered messages
+* Send only this path to the LLM
+
+Avoids:
+
+* redundant context
+* unrelated conversation leakage
+
+---
+
+### API Layer
+
+* Unified abstraction for:
+
+  * Gemini
+  * OpenAI
+  * Claude
+
+* Dynamically injects context per request
+
+---
+
+### State Management
+
+* Managed via `ChatController`
+* Handles:
+
+  * node creation
+  * branching logic
+  * context reconstruction
+  * API orchestration
+
+---
+
+## Key Design Decisions
+
+### No Context Merging (for now)
+
+* Avoids conflicting instructions across branches
+* Keeps behavior predictable
+* Merge strategies require conflict resolution
+
+---
+
+### Full Context (No Summarization)
+
+* Prioritizes accuracy over compression
+* Avoids hallucination from lossy summaries
+
+---
+
+### Tree Structure (Not DAG)
+
+* Ensures simple traversal
+* Predictable parent-child relationships
+
+---
+
+## Features
+
+* Branch from any message
+* Visualize conversation as a graph
+* Navigate between branches
+* Dynamic context reconstruction
+* Multi-LLM support
+* Persistent local storage (Hive)
+
+---
+
+## Limitations
+
+* No token compression
+* No branch merging
+* Local-only storage
+
+---
+
+## Future Work
+
+* Context compression (summarization / sliding window)
+* Branch merging strategies
+* Cloud sync
+* Token usage benchmarking
+
+---
+
+## What This Demonstrates
+
+* Understanding of LLM statelessness
+* Context optimization using data structures
+* Tradeoffs between accuracy and efficiency
+* Multi-provider abstraction design
+
+---
+
+## Setup
+
+1. Add API key (locally)
+2. Select provider
+3. Start branching conversations
+
+---
+
+## Disclaimer
+
+* Tested primarily with Gemini API
+* API keys are never stored or transmitted externally
